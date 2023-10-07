@@ -24,6 +24,15 @@
   z-index: 3;
 }
 
+.dino_squart {
+  background-image: url(../img/sprite.png);
+  position: absolute;
+  width: 85px;
+  left: 20px;
+  height: 70px;
+  z-index: 3;
+}
+
 .cloud {
   background-image: url(../img/sprite.png);
   background-position: -125px -2px;
