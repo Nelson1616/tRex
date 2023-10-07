@@ -1,11 +1,11 @@
-.deserto {
+.desert {
   border: 1px solid black;
   position: relative;
   overflow: hidden;
   z-index: 1;
 }
 
-.chao {
+.ground {
   background-image: url(../img/sprite.png);
   position: absolute;
   bottom: 0px;
@@ -24,7 +24,7 @@
   z-index: 3;
 }
 
-.nuvem {
+.cloud {
   background-image: url(../img/sprite.png);
   background-position: -125px -2px;
   position: absolute;

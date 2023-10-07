@@ -3,17 +3,17 @@
   const FPS = 300;
   const HEIGHT = 300;
   const WIDTH = 1024;
-  const PROB_NUVEM = 1;
+  const PROB_CLOUD = 1;
 
   let gameLoop;
-  let deserto;
+  let desert;
   let dino;
-  let nuvens = [];
+  let clouds = [];
   let frame = 0;
 
   function init() {
     gameLoop = setInterval(run, 1000 / FPS)
-    deserto = new Deserto();
+    desert = new Desert();
     dino = new Dino();
   }
 
@@ -23,21 +23,21 @@
     }
   })
 
-  class Deserto {
+  class Desert {
     constructor() {
       this.element = document.createElement("div")
-      this.element.className = "deserto";
+      this.element.className = "desert";
       this.element.style.width = `${WIDTH}px`;
       this.element.style.height = `${HEIGHT}px`;
       document.getElementById("game").appendChild(this.element)
 
-      this.chao = document.createElement("div")
-      this.chao.className = "chao"
-      this.chao.style.backgroundPositionX = 0;
-      this.element.appendChild(this.chao)
+      this.ground = document.createElement("div")
+      this.ground.className = "ground"
+      this.ground.style.backgroundPositionX = 0;
+      this.element.appendChild(this.ground)
     }
-    mover() {
-      this.chao.style.backgroundPositionX = `${parseInt(this.chao.style.backgroundPositionX) - 1}px`
+    move() {
+      this.ground.style.backgroundPositionX = `${parseInt(this.ground.style.backgroundPositionX) - 1}px`
     }
   }
 
@@ -45,19 +45,19 @@
     #status
     constructor() {
       this.backgroundPositionsX = {
-        correndo1: "-1391px",
-        correndo2: "-1457px",
-        pulando: "-1259px"
+        running1: "-1391px",
+        running2: "-1457px",
+        jumping: "-1259px"
       }
       this.#status = 0; // 0-correndo, 1-subindo, 2-descendo
-      this.altumaMinima = 2;
-      this.altumaMaxima = 100;
+      this.minHeight = 2;
+      this.maxHeight = 100;
       this.element = document.createElement("div")
       this.element.className = "dino";
-      this.element.style.backgroundPositionX = this.backgroundPositionsX.correndo1;
+      this.element.style.backgroundPositionX = this.backgroundPositionsX.running1;
       this.element.style.backgroundPositionY = "-2px";
-      this.element.style.bottom = `${this.altumaMinima}px`
-      deserto.element.appendChild(this.element)
+      this.element.style.bottom = `${this.minHeight}px`
+      desert.element.appendChild(this.element)
     }
     /**
      * @param {number} value
@@ -68,29 +68,29 @@
     get status() {
       return this.#status;
     }
-    correr() {
-      if (this.#status === 0 && frame % 20 === 0) this.element.style.backgroundPositionX = this.element.style.backgroundPositionX === this.backgroundPositionsX.correndo1 ? this.backgroundPositionsX.correndo2 : this.backgroundPositionsX.correndo1;
+    run() {
+      if (this.#status === 0 && frame % 20 === 0) this.element.style.backgroundPositionX = this.element.style.backgroundPositionX === this.backgroundPositionsX.running1 ? this.backgroundPositionsX.running2 : this.backgroundPositionsX.running1;
       else if (this.#status === 1) {
-        this.element.style.backgroundPositionX = this.backgroundPositionsX.pulando;
+        this.element.style.backgroundPositionX = this.backgroundPositionsX.jumping;
         this.element.style.bottom = `${parseInt(this.element.style.bottom) + 1}px`;
-        if (parseInt(this.element.style.bottom) >= this.altumaMaxima) this.status = 2;
+        if (parseInt(this.element.style.bottom) >= this.maxHeight) this.status = 2;
       }
       else if (this.#status === 2) {
         this.element.style.bottom = `${parseInt(this.element.style.bottom) - 1}px`;
-        if (parseInt(this.element.style.bottom) <= this.altumaMinima) this.status = 0;
+        if (parseInt(this.element.style.bottom) <= this.minHeight) this.status = 0;
       }
     }
   }
 
-  class Nuvem {
+  class Cloud {
     constructor() {
       this.element = document.createElement("div");
-      this.element.className = "nuvem";
+      this.element.className = "cloud";
       this.element.style.right = 0;
       this.element.style.top = `${parseInt(Math.random() * 200)}px`
-      deserto.element.appendChild(this.element);
+      desert.element.appendChild(this.element);
     }
-    mover() {
+    move() {
       this.element.style.right = `${parseInt(this.element.style.right) + 1}px`;
     }
   }
@@ -98,10 +98,10 @@
   function run() {
     frame = frame + 1
     if (frame === FPS) frame = 0;
-    deserto.mover()
-    dino.correr()
-    if (Math.random() * 100 <= PROB_NUVEM) nuvens.push(new Nuvem());
-    if (frame % 2 === 0) nuvens.forEach(nuvem => nuvem.mover());
+    desert.move()
+    dino.run()
+    if (Math.random() * 100 <= PROB_CLOUD) clouds.push(new Cloud());
+    if (frame % 2 === 0) clouds.forEach(cloud => cloud.move());
   }
 
   init()
