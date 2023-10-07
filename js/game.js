@@ -18,6 +18,7 @@
   let intervals = [];
 
   let gameState = GAME_STATE_INITIALIZED;
+  let speed = 2;
   let gameLoop;
   let generateCloudsLoop;
   let generateObstaclesLoop;
@@ -79,6 +80,7 @@
   function init() {
     document.getElementById("game").innerHTML = "";
     day = true;
+    speed = 2;
     frame = 0;
     counter = 0;
     gameLoop = setInterval(run, 1000 / FPS);
@@ -169,7 +171,7 @@
 
     }
     move() {
-      this.ground.style.backgroundPositionX = `${parseInt(this.ground.style.backgroundPositionX) - 1}px`
+      this.ground.style.backgroundPositionX = `${parseInt(this.ground.style.backgroundPositionX) - speed}px`
     }
   }
 
@@ -180,7 +182,7 @@
         running1: "-1391px",
         running2: "-1457px",
         squartting1: "-1655px",
-        squartting2: "-1740px",
+        squartting2: "-1745px",
         jumping: "-1259px",
         died: "-1523px"
       }
@@ -230,13 +232,13 @@
 
           this.element.style.backgroundPositionX = this.backgroundPositionsX.jumping;
 
-          let percentShortJump = 0.65;
+          let percentShortJump = 0.6;
 
-          let percentMidleJump = 0.85;
+          let percentMidleJump = 0.8;
 
           let targetHeight = this.maxHeight * percentShortJump;
 
-          let speedpx = 3;
+          let speedpx = 4;
 
           //up
           while (parseInt(this.element.style.bottom) <= targetHeight && this.down == false && gameState != GAME_STATE_OVER) {
@@ -247,7 +249,7 @@
               speedpx = 2;
             }
             else {
-              speedpx = 3;
+              speedpx = 4;
             }
 
             this.element.style.bottom = `${parseInt(this.element.style.bottom) + speedpx}px`;
@@ -272,7 +274,7 @@
               speedpx = 2;
             }
             else {
-              speedpx = 3;
+              speedpx = 4;
             }
 
             this.element.style.bottom = `${parseInt(this.element.style.bottom) - (this.down ? 5 : speedpx)}px`;
@@ -323,7 +325,7 @@
       if (gameState == GAME_STATE_RUNNING) {
         if (frame % 2 === 0) {
           if (parseInt(cloud.element.style.right) < WIDTH) {
-            cloud.element.style.right = `${parseInt(cloud.element.style.right) + 1}px`;
+            cloud.element.style.right = `${parseInt(cloud.element.style.right) + speed}px`;
           }
           else {
             clearInterval(cloud.id);
@@ -375,7 +377,7 @@
           }
 
 
-          obstacle.element.style.right = `${parseInt(obstacle.element.style.right) + 1}px`;
+          obstacle.element.style.right = `${parseInt(obstacle.element.style.right) + speed}px`;
 
           if (collided(
             WIDTH - parseInt(obstacle.element.style.right) - parseInt(obstacle.element.style.width),
@@ -498,6 +500,8 @@
         day = true;
         document.getElementsByClassName("desert")[0].style.backgroundColor = "white";
       }
+
+      speed++;
     }
   }
 
