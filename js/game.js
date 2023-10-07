@@ -6,12 +6,19 @@
   const PROB_CLOUD = 100;
   const PROB_OBSTACLE = 100;
 
-  const DINO_STATUS_STOPPED = 0;
-  const DINO_STATUS_RUNNING = 1;
-  const DINO_STATUS_JUMPING = 2;
-  const DINO_STATUS_SQUATTING = 3;
-  const DINO_STATUS_DIED = 4;
+  const DINO_STATUS_RUNNING = 0;
+  const DINO_STATUS_JUMPING = 1;
+  const DINO_STATUS_SQUATTING = 2;
+  const DINO_STATUS_DIED = 3;
 
+  const GAME_STATE_INITIALIZED = 0;
+  const GAME_STATE_RUNNING = 1;
+  const GAME_STATE_PAUSED = 2;
+  const GAME_STATE_OVER = 3;
+
+  let intervals = [];
+
+  let gameState = GAME_STATE_INITIALIZED;
   let gameLoop;
   let generateCloudsLoop;
   let generateObstaclesLoop;
@@ -71,19 +78,53 @@
   ];
 
   function init() {
+    document.getElementById("game").innerHTML = "";
+    day = true;
+    frame = 0;
+    counter = 0;
     gameLoop = setInterval(run, 1000 / FPS);
+    intervals.push(gameLoop);
+
     generateCloudsLoop = setInterval(generateClouds, 1500);
+    intervals.push(generateCloudsLoop);
+
     generateObstaclesLoop = setInterval(generateObstacles, 2000);
+    intervals.push(generateObstaclesLoop);
+
     dayNightLoop = setInterval(dayNight, 5000);
+    intervals.push(dayNightLoop);
+
     desert = new Desert();
     dino = new Dino();
   }
 
+  function end() {
+    intervals.forEach(e => {
+      clearInterval(e);
+    });
+  }
+
   window.addEventListener("keydown", (e) => {
     if (e.code === "Space" || e.code === "ArrowUp") {
+      if (gameState != GAME_STATE_RUNNING) {
+
+        if (gameState == GAME_STATE_OVER) {
+          gameState = GAME_STATE_RUNNING;
+          init();
+        }
+
+        gameState = GAME_STATE_RUNNING;
+      }
+
       dino.up = true;
 
       dino.jump();
+    }
+
+    if (e.code === "KeyP") {
+      if (gameState == GAME_STATE_RUNNING) {
+        gameState = GAME_STATE_PAUSED;
+      }
     }
 
     if (e.code === "ArrowDown") {
@@ -145,7 +186,8 @@
         running2: "-1457px",
         squartting1: "-1655px",
         squartting2: "-1740px",
-        jumping: "-1259px"
+        jumping: "-1259px",
+        died: "-1523px"
       }
       this.#status = DINO_STATUS_RUNNING;
       this.minHeight = 2;
@@ -173,96 +215,102 @@
     }
 
     run() {
-      if (this.#status == DINO_STATUS_RUNNING || this.#status == DINO_STATUS_JUMPING) {
-        if (this.element.style.backgroundPositionX == this.backgroundPositionsX.squartting1
-          || this.element.style.backgroundPositionX == this.backgroundPositionsX.squartting2) {
-          this.element.style.backgroundPositionX = this.backgroundPositionsX.running1
+      if (gameState == GAME_STATE_RUNNING) {
+        if (this.#status == DINO_STATUS_RUNNING || this.#status == DINO_STATUS_JUMPING) {
+          if (this.element.style.backgroundPositionX == this.backgroundPositionsX.squartting1
+            || this.element.style.backgroundPositionX == this.backgroundPositionsX.squartting2) {
+            this.element.style.backgroundPositionX = this.backgroundPositionsX.running1
+          }
+
+          this.element.className = "dino";
+        }
+        if (this.#status == DINO_STATUS_SQUATTING) {
+          if (this.element.style.backgroundPositionX == this.backgroundPositionsX.running1
+            || this.element.style.backgroundPositionX == this.backgroundPositionsX.running2) {
+            this.element.style.backgroundPositionX = this.backgroundPositionsX.squartting1
+          }
+
+          this.element.className = "dino_squart";
         }
 
-        this.element.className = "dino";
-      }
-      if (this.#status == DINO_STATUS_SQUATTING) {
-        if (this.element.style.backgroundPositionX == this.backgroundPositionsX.running1
-          || this.element.style.backgroundPositionX == this.backgroundPositionsX.running2) {
-          this.element.style.backgroundPositionX = this.backgroundPositionsX.squartting1
+        if (this.#status == DINO_STATUS_RUNNING && frame % 20 === 0) {
+          this.element.style.backgroundPositionX = this.element.style.backgroundPositionX === this.backgroundPositionsX.running1 ? this.backgroundPositionsX.running2 : this.backgroundPositionsX.running1;
         }
-
-        this.element.className = "dino_squart";
-      }
-
-      if (this.#status == DINO_STATUS_RUNNING && frame % 20 === 0) {
-        this.element.style.backgroundPositionX = this.element.style.backgroundPositionX === this.backgroundPositionsX.running1 ? this.backgroundPositionsX.running2 : this.backgroundPositionsX.running1;
-      }
-      if (this.#status == DINO_STATUS_SQUATTING && frame % 20 === 0) {
-        this.element.style.backgroundPositionX = this.element.style.backgroundPositionX === this.backgroundPositionsX.squartting1 ? this.backgroundPositionsX.squartting2 : this.backgroundPositionsX.squartting1;
+        if (this.#status == DINO_STATUS_SQUATTING && frame % 20 === 0) {
+          this.element.style.backgroundPositionX = this.element.style.backgroundPositionX === this.backgroundPositionsX.squartting1 ? this.backgroundPositionsX.squartting2 : this.backgroundPositionsX.squartting1;
+        }
       }
     }
 
     async jump() {
-      if (dino.status == DINO_STATUS_RUNNING) {
-        dino.status = DINO_STATUS_JUMPING;
+      if (gameState == GAME_STATE_RUNNING) {
+        if (dino.status == DINO_STATUS_RUNNING) {
+          dino.status = DINO_STATUS_JUMPING;
 
-        this.element.style.bottom = `${this.minHeight + 1}px`;
+          this.element.style.bottom = `${this.minHeight + 1}px`;
 
-        this.element.style.backgroundPositionX = this.backgroundPositionsX.jumping;
+          this.element.style.backgroundPositionX = this.backgroundPositionsX.jumping;
 
-        let percentShortJump = 0.65;
+          let percentShortJump = 0.65;
 
-        let percentMidleJump = 0.85;
+          let percentMidleJump = 0.85;
 
-        let targetHeight = this.maxHeight * percentShortJump;
+          let targetHeight = this.maxHeight * percentShortJump;
 
-        let speedpx = 3;
+          let speedpx = 3;
 
-        //up
-        while (parseInt(this.element.style.bottom) <= targetHeight && this.down == false) {
-          if (parseInt(this.element.style.bottom) >= this.maxHeight * percentMidleJump) {
-            speedpx = 1;
-          }
-          else if (parseInt(this.element.style.bottom) >= this.maxHeight * percentShortJump) {
-            speedpx = 2;
-          }
-          else {
-            speedpx = 3;
-          }
+          //up
+          while (parseInt(this.element.style.bottom) <= targetHeight && this.down == false && gameState != GAME_STATE_OVER) {
+            if (parseInt(this.element.style.bottom) >= this.maxHeight * percentMidleJump) {
+              speedpx = 1;
+            }
+            else if (parseInt(this.element.style.bottom) >= this.maxHeight * percentShortJump) {
+              speedpx = 2;
+            }
+            else {
+              speedpx = 3;
+            }
 
-          this.element.style.bottom = `${parseInt(this.element.style.bottom) + speedpx}px`;
+            this.element.style.bottom = `${parseInt(this.element.style.bottom) + speedpx}px`;
 
-          if (targetHeight != this.maxHeight
-            && (targetHeight - 5 <= parseInt(this.element.style.bottom))
-            && this.up == true) {
-            targetHeight = this.maxHeight;
-          }
+            if (targetHeight != this.maxHeight
+              && (targetHeight - 5 <= parseInt(this.element.style.bottom))
+              && this.up == true) {
+              targetHeight = this.maxHeight;
+            }
 
-          await new Promise(resolve => setTimeout(resolve));
-        }
-
-        //down
-        while (parseInt(this.element.style.bottom) > this.minHeight) {
-          await new Promise(resolve => setTimeout(resolve));
-
-          if (parseInt(this.element.style.bottom) >= this.maxHeight * percentMidleJump) {
-            speedpx = 1;
-          }
-          else if (parseInt(this.element.style.bottom) >= this.maxHeight * percentShortJump) {
-            speedpx = 2;
-          }
-          else {
-            speedpx = 3;
+            await new Promise(resolve => setTimeout(resolve));
           }
 
-          this.element.style.bottom = `${parseInt(this.element.style.bottom) - (this.down ? 5 : speedpx)}px`;
-        }
+          //down
+          while (parseInt(this.element.style.bottom) > this.minHeight && gameState != GAME_STATE_OVER) {
+            await new Promise(resolve => setTimeout(resolve));
 
-        this.element.style.bottom = "2px";
+            if (parseInt(this.element.style.bottom) >= this.maxHeight * percentMidleJump) {
+              speedpx = 1;
+            }
+            else if (parseInt(this.element.style.bottom) >= this.maxHeight * percentShortJump) {
+              speedpx = 2;
+            }
+            else {
+              speedpx = 3;
+            }
 
-        if (this.down) {
-          this.status = DINO_STATUS_SQUATTING;
-          this.element.style.backgroundPositionX = this.backgroundPositionsX.squartting1
-          this.element.className = "dino_squart";
-        }
-        else {
-          this.status = DINO_STATUS_RUNNING;
+            this.element.style.bottom = `${parseInt(this.element.style.bottom) - (this.down ? 5 : speedpx)}px`;
+          }
+
+          if (gameState != GAME_STATE_OVER) {
+            this.element.style.bottom = "2px";
+
+            if (this.down) {
+              this.status = DINO_STATUS_SQUATTING;
+              this.element.style.backgroundPositionX = this.backgroundPositionsX.squartting1
+              this.element.className = "dino_squart";
+            }
+            else {
+              this.status = DINO_STATUS_RUNNING;
+            }
+          }
         }
       }
     }
@@ -277,15 +325,17 @@
       desert.element.appendChild(this.element);
     }
     move(cloud) {
-      if (frame % 2 === 0) {
-        if (parseInt(cloud.element.style.right) < WIDTH) {
-          cloud.element.style.right = `${parseInt(cloud.element.style.right) + 1}px`;
-        }
-        else {
-          clearInterval(cloud.id);
-          cloud.element.remove();
-          cloud = null;
-          
+      if (gameState == GAME_STATE_RUNNING) {
+        if (frame % 2 === 0) {
+          if (parseInt(cloud.element.style.right) < WIDTH) {
+            cloud.element.style.right = `${parseInt(cloud.element.style.right) + 1}px`;
+          }
+          else {
+            clearInterval(cloud.id);
+            cloud.element.remove();
+            cloud = null;
+
+          }
         }
       }
     }
@@ -297,14 +347,14 @@
       this.template = obstaclesTemplates[index];
 
       this.minHeight = 2;
-      
+
       if (this.template.class == "obstacle8" || this.template.class == "obstacle9") {
         let additionalHeight = Math.floor(Math.random() * 3) * 60
         this.minHeight = 2 + additionalHeight;
       }
 
       this.element = document.createElement("div");
-      this.element.className =  this.template.class;
+      this.element.className = this.template.class;
       this.element.style.right = `-${this.template.width}px`;
       this.element.style.bottom = `${this.minHeight}px`
       this.element.style.width = this.template.width + "px";
@@ -313,70 +363,89 @@
       desert.element.appendChild(this.element);
     }
     move(obstacle) {
-      if (parseInt(obstacle.element.style.right) < WIDTH) {
+      if (gameState == GAME_STATE_RUNNING) {
+        if (parseInt(obstacle.element.style.right) < WIDTH) {
 
-        if (obstacle.template.class == "obstacle8" && frame % 60 === 0) {
-          obstacle.template = obstaclesTemplates[8];
-          obstacle.element.className =  obstacle.template.class;
-          obstacle.element.style.width = obstacle.template.width + "px";
-          obstacle.element.style.height = obstacle.template.height + "px";
-        }
-        else if(obstacle.template.class == "obstacle9" && frame % 60 === 0) {
-          obstacle.template = obstaclesTemplates[7];
-          obstacle.element.className =  obstacle.template.class;
-          obstacle.element.style.width = obstacle.template.width + "px";
-          obstacle.element.style.height = obstacle.template.height + "px";
-        }
+          if (obstacle.template.class == "obstacle8" && frame % 60 === 0) {
+            obstacle.template = obstaclesTemplates[8];
+            obstacle.element.className = obstacle.template.class;
+            obstacle.element.style.width = obstacle.template.width + "px";
+            obstacle.element.style.height = obstacle.template.height + "px";
+          }
+          else if (obstacle.template.class == "obstacle9" && frame % 60 === 0) {
+            obstacle.template = obstaclesTemplates[7];
+            obstacle.element.className = obstacle.template.class;
+            obstacle.element.style.width = obstacle.template.width + "px";
+            obstacle.element.style.height = obstacle.template.height + "px";
+          }
 
 
-        obstacle.element.style.right = `${parseInt(obstacle.element.style.right) + 1}px`;
+          obstacle.element.style.right = `${parseInt(obstacle.element.style.right) + 1}px`;
 
-        if (collided(
-          WIDTH - parseInt(obstacle.element.style.right) - parseInt(obstacle.element.style.width),
-          parseInt(obstacle.element.style.bottom), 
-          parseInt(obstacle.element.style.width),
-          parseInt(obstacle.element.style.height),
-          parseInt(dino.element.style.left),
-          parseInt(dino.element.style.bottom), 
-          parseInt(dino.element.style.width),
-          parseInt(dino.element.style.height)
+          if (collided(
+            WIDTH - parseInt(obstacle.element.style.right) - parseInt(obstacle.element.style.width),
+            parseInt(obstacle.element.style.bottom),
+            parseInt(obstacle.element.style.width),
+            parseInt(obstacle.element.style.height),
+            parseInt(dino.element.style.left),
+            parseInt(dino.element.style.bottom),
+            parseInt(dino.element.style.width),
+            parseInt(dino.element.style.height)
           )) {
-          console.log("colision detected");
+            colisionDetected();
+          }
         }
-      }
-      else {
-        clearInterval(obstacle.id);
-        obstacle.element.remove();
-        obstacle = null;
+        else {
+          clearInterval(obstacle.id);
+          obstacle.element.remove();
+          obstacle = null;
+        }
       }
     }
   }
 
+  function colisionDetected() {
+    console.log("aaa");
+    gameState = GAME_STATE_OVER;
+    dino.element.style.backgroundPositionX = dino.backgroundPositionsX.died;
+    end();
+  }
+
   function run() {
-    frame = frame + 1
-    counter++;
+    console.log("test");
     desert.counterElement.innerHTML = counter;
-    if (frame === FPS) frame = 0;
-    desert.move()
-    dino.run();
+
+    if (gameState == GAME_STATE_RUNNING) {
+      frame = frame + 1
+      counter++;
+      if (frame === FPS) frame = 0;
+      desert.move()
+      dino.run();
+    }
   }
 
   function generateClouds() {
-    if (Math.random() * 100 <= PROB_CLOUD) {
-      let newCloud = new Cloud();
-      newCloud.id = setInterval(newCloud.move, 1000 / FPS, newCloud);
+    if (gameState == GAME_STATE_RUNNING) {
+      if (Math.random() * 100 <= PROB_CLOUD) {
+        let newCloud = new Cloud();
+        newCloud.id = setInterval(newCloud.move, 1000 / FPS, newCloud);
+        intervals.push(newCloud.id);
+      }
     }
   }
 
   function generateObstacles() {
-    if (Math.random() * 100 <= PROB_OBSTACLE) {
-      let newObstacle = new Obstacle();
-      newObstacle.id = setInterval(newObstacle.move, 1000 / FPS, newObstacle);
+    if (gameState == GAME_STATE_RUNNING) {
+      if (Math.random() * 100 <= PROB_OBSTACLE) {
+        let newObstacle = new Obstacle();
+        newObstacle.id = setInterval(newObstacle.move, 1000 / FPS, newObstacle);
+        intervals.push(newObstacle.id);
+      }
     }
   }
 
   class Point {
-    constructor(x , y) {
+    constructor(x, y) {
       this.x = x;
       this.y = y;
     }
@@ -426,13 +495,15 @@
   }
 
   function dayNight() {
-    if (day) {
-      day = false;
-      document.getElementsByClassName("desert")[0].style.backgroundColor = "black";
-    }
-    else {
-      day = true;
-      document.getElementsByClassName("desert")[0].style.backgroundColor = "white";
+    if (gameState == GAME_STATE_RUNNING) {
+      if (day) {
+        day = false;
+        document.getElementsByClassName("desert")[0].style.backgroundColor = "black";
+      }
+      else {
+        day = true;
+        document.getElementsByClassName("desert")[0].style.backgroundColor = "white";
+      }
     }
   }
 
