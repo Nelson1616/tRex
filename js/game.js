@@ -24,7 +24,7 @@
   function init() {
     gameLoop = setInterval(run, 1000 / FPS);
     generateCloudsLoop = setInterval(generateClouds, 1500);
-    generateObstaclesLoop = setInterval(generateObstacles, 3000);
+    generateObstaclesLoop = setInterval(generateObstacles, 4000);
     dayNightLoop = setInterval(dayNight, 5000);
     desert = new Desert();
     dino = new Dino();
@@ -102,6 +102,9 @@
       this.element.style.backgroundPositionX = this.backgroundPositionsX.running1;
       this.element.style.backgroundPositionY = "-2px";
       this.element.style.bottom = `${this.minHeight}px`
+      this.element.style.left = `20px`
+      this.element.style.width = `66px`
+      this.element.style.height = `70px`
       desert.element.appendChild(this.element)
     }
     /**
@@ -180,7 +183,7 @@
         }
 
         //down
-        while (parseInt(this.element.style.bottom) >= this.minHeight) {
+        while (parseInt(this.element.style.bottom) > this.minHeight) {
           await new Promise(resolve => setTimeout(resolve));
 
           if (parseInt(this.element.style.bottom) >= this.maxHeight * percentMidleJump) {
@@ -195,6 +198,8 @@
 
           this.element.style.bottom = `${parseInt(this.element.style.bottom) - (this.down ? 5 : speedpx)}px`;
         }
+
+        this.element.style.bottom = "2px";
 
         if (this.down) {
           this.status = DINO_STATUS_SQUATTING;
@@ -223,6 +228,8 @@
         }
         else {
           cloud.element.remove();
+          cloud = null;
+          
         }
       }
     }
@@ -230,19 +237,40 @@
 
   class Obstacle {
     constructor() {
-      this.element = document.createElement("div");
-      this.element.className =  /*"obstacle" + parseInt(Math.random() * 7);*/ "obstacle1";
-      this.element.style.right = "-70px";
       this.minHeight = 2;
+
+      this.element = document.createElement("div");
+
+      this.element.className =  /*"obstacle" + parseInt(Math.random() * 7);*/ "obstacle1";
+
+      this.element.style.right = "-70px";
       this.element.style.bottom = `${this.minHeight}px`
+      this.element.style.width = "26px";
+      this.element.style.height = "54px";
+
       desert.element.appendChild(this.element);
     }
     move(obstacle) {
       if (parseInt(obstacle.element.style.right) < WIDTH) {
         obstacle.element.style.right = `${parseInt(obstacle.element.style.right) + 1}px`;
+
+        if (collided(
+          WIDTH - parseInt(obstacle.element.style.right) - parseInt(obstacle.element.style.width),
+          parseInt(obstacle.element.style.bottom), 
+          parseInt(obstacle.element.style.width),
+          parseInt(obstacle.element.style.height),
+          parseInt(dino.element.style.left),
+          parseInt(dino.element.style.bottom), 
+          parseInt(dino.element.style.width),
+          parseInt(dino.element.style.height)
+          )) {
+          console.log("colision detected");
+        }
       }
       else {
+        clearInterval(obstacle.id);
         obstacle.element.remove();
+        obstacle = null;
       }
     }
   }
@@ -264,8 +292,58 @@
   function generateObstacles() {
     if (Math.random() * 100 <= PROB_OBSTACLE) {
       let newObstacle = new Obstacle();
-      setInterval(newObstacle.move, 1000 / FPS, newObstacle);
+      newObstacle.id = setInterval(newObstacle.move, 1000 / FPS, newObstacle);
     }
+  }
+
+  class Point {
+    constructor(x , y) {
+      this.x = x;
+      this.y = y;
+    }
+  }
+
+  class Rectangle {
+    constructor(x, y, w, l) {
+      this.p1 = new Point(x, y + l);
+      this.p2 = new Point(x + w, y + l);
+      this.p3 = new Point(x, y);
+      this.p4 = new Point(x + w, y);
+    }
+
+    /**
+     * @param {Point} p
+     */
+    isPointInside(p) {
+      if (p.x >= this.p3.x && p.x <= this.p4.x && p.y <= this.p1.y && p.y >= this.p4.y) {
+        return true;
+      }
+      else {
+        return false;
+      }
+    }
+  }
+
+  function collided(x1, y1, w1, l1, x2, y2, w2, l2) {
+    let ob1 = new Rectangle(x1, y1, w1, l1);
+    let ob2 = new Rectangle(x2, y2, w2, l2);
+
+    // console.log(ob1.p1);
+    // console.log(ob1.p2);
+    // console.log(ob1.p3);
+    // console.log(ob1.p4);
+    // console.log("////");
+
+    if (ob1.isPointInside(ob2.p1) || ob1.isPointInside(ob2.p2) || ob1.isPointInside(ob2.p3) || ob1.isPointInside(ob2.p4)) {
+      return true;
+    }
+    else if (ob2.isPointInside(ob1.p1) || ob2.isPointInside(ob1.p2) || ob2.isPointInside(ob1.p3) || ob2.isPointInside(ob1.p4)) {
+      return true;
+    }
+    else {
+      return false;
+    }
+
   }
 
   function dayNight() {
