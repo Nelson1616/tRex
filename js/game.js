@@ -4,6 +4,7 @@
   const HEIGHT = 300;
   const WIDTH = 1024;
   const PROB_CLOUD = 100;
+  const PROB_OBSTACLE = 100;
 
   const DINO_STATUS_STOPPED = 0;
   const DINO_STATUS_RUNNING = 1;
@@ -13,6 +14,7 @@
 
   let gameLoop;
   let generateCloudsLoop;
+  let generateObstaclesLoop;
   let dayNightLoop;
   let day = true;
   let desert;
@@ -22,6 +24,7 @@
   function init() {
     gameLoop = setInterval(run, 1000 / FPS);
     generateCloudsLoop = setInterval(generateClouds, 1500);
+    generateObstaclesLoop = setInterval(generateObstacles, 3000);
     dayNightLoop = setInterval(dayNight, 5000);
     desert = new Desert();
     dino = new Dino();
@@ -225,6 +228,25 @@
     }
   }
 
+  class Obstacle {
+    constructor() {
+      this.element = document.createElement("div");
+      this.element.className =  /*"obstacle" + parseInt(Math.random() * 7);*/ "obstacle1";
+      this.element.style.right = "-70px";
+      this.minHeight = 2;
+      this.element.style.bottom = `${this.minHeight}px`
+      desert.element.appendChild(this.element);
+    }
+    move(obstacle) {
+      if (parseInt(obstacle.element.style.right) < WIDTH) {
+        obstacle.element.style.right = `${parseInt(obstacle.element.style.right) + 1}px`;
+      }
+      else {
+        obstacle.element.remove();
+      }
+    }
+  }
+
   function run() {
     frame = frame + 1
     if (frame === FPS) frame = 0;
@@ -234,8 +256,15 @@
 
   function generateClouds() {
     if (Math.random() * 100 <= PROB_CLOUD) {
-      newCloud = new Cloud();
+      let newCloud = new Cloud();
       setInterval(newCloud.move, 1000 / FPS, newCloud);
+    }
+  }
+
+  function generateObstacles() {
+    if (Math.random() * 100 <= PROB_OBSTACLE) {
+      let newObstacle = new Obstacle();
+      setInterval(newObstacle.move, 1000 / FPS, newObstacle);
     }
   }
 

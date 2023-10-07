@@ -42,3 +42,12 @@
   height: 20px;
   z-index: 2;
 }
+
+.obstacle1 {
+  background-image: url(../img/sprite.png);
+  background-position: -334px 0px;
+  position: absolute;
+  width: 26px;
+  height: 54px;
+  z-index: 2;
+}
