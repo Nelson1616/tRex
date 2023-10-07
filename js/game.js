@@ -13,6 +13,8 @@
 
   let gameLoop;
   let generateCloudsLoop;
+  let dayNightLoop;
+  let day = true;
   let desert;
   let dino;
   let frame = 0;
@@ -20,6 +22,7 @@
   function init() {
     gameLoop = setInterval(run, 1000 / FPS);
     generateCloudsLoop = setInterval(generateClouds, 1500);
+    dayNightLoop = setInterval(dayNight, 5000);
     desert = new Desert();
     dino = new Dino();
   }
@@ -36,7 +39,7 @@
 
       if (dino.status == DINO_STATUS_RUNNING) {
         dino.status = DINO_STATUS_SQUATTING;
-        dino.element.style.backgroundPositionX = this.backgroundPositionsX.squartting1
+        dino.element.style.backgroundPositionX = dino.backgroundPositionsX.squartting1
         dino.element.className = "dino_squart";
       }
     }
@@ -52,7 +55,7 @@
 
       if (dino.status == DINO_STATUS_SQUATTING) {
         dino.status = DINO_STATUS_RUNNING;
-        dino.element.style.backgroundPositionX = this.backgroundPositionsX.running1;
+        dino.element.style.backgroundPositionX = dino.backgroundPositionsX.running1;
         dino.element.className = "dino";
       }
     }
@@ -233,6 +236,17 @@
     if (Math.random() * 100 <= PROB_CLOUD) {
       newCloud = new Cloud();
       setInterval(newCloud.move, 1000 / FPS, newCloud);
+    }
+  }
+
+  function dayNight() {
+    if (day) {
+      day = false;
+      document.getElementsByClassName("desert")[0].style.backgroundColor = "black";
+    }
+    else {
+      day = true;
+      document.getElementsByClassName("desert")[0].style.backgroundColor = "white";
     }
   }
 

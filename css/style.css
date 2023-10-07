@@ -2,6 +2,7 @@
   border: 1px solid black;
   position: relative;
   overflow: hidden;
+  transition: background 3s;
   z-index: 1;
 }
 
