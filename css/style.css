@@ -43,12 +43,84 @@
   z-index: 2;
 }
 
-.obstacle1 {
+.obstacle1{
   background-image: url(../img/sprite.png);
   background-position: -334px 0px;
   position: absolute;
   width: 26px;
   height: 54px;
+  z-index: 2;
+}
+
+.obstacle2 {
+  background-image: url(../img/sprite.png);
+  background-position: -360px 0px;
+  position: absolute;
+  width: 51px;
+  height: 54px;
+  z-index: 2;
+}
+
+.obstacle3 {
+  background-image: url(../img/sprite.png);
+  background-position: -386px 0px;
+  position: absolute;
+  width: 76px;
+  height: 54px;
+  z-index: 2;
+}
+
+.obstacle4 {
+  background-image: url(../img/sprite.png);
+  background-position: -386px 0px;
+  position: absolute;
+  width: 102px;
+  height: 54px;
+  z-index: 2;
+}
+
+.obstacle5{
+  background-image: url(../img/sprite.png);
+  background-position: -490px 0px;
+  position: absolute;
+  width: 36px;
+  height: 75px;
+  z-index: 2;
+}
+
+.obstacle6{
+  background-image: url(../img/sprite.png);
+  background-position: -527px 0px;
+  position: absolute;
+  width: 74px;
+  height: 75px;
+  z-index: 2;
+}
+
+.obstacle7{
+  background-image: url(../img/sprite.png);
+  background-position: -602px 0px;
+  position: absolute;
+  width: 112px;
+  height: 75px;
+  z-index: 2;
+}
+
+.obstacle8{
+  background-image: url(../img/sprite.png);
+  background-position: -265px 0px;
+  position: absolute;
+  width: 70px;
+  height: 45px;
+  z-index: 2;
+}
+
+.obstacle9{
+  background-image: url(../img/sprite.png);
+  background-position: -195px -10px;
+  position: absolute;
+  width: 70px;
+  height: 50px;
   z-index: 2;
 }
 

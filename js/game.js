@@ -22,10 +22,58 @@
   let frame = 0;
   let counter = 0;
 
+  const obstaclesTemplates = [
+    {
+      class: "obstacle1",
+      width: 26,
+      height: 54,
+    },
+    {
+      class: "obstacle2",
+      width: 51,
+      height: 54,
+    },
+    {
+      class: "obstacle3",
+      width: 76,
+      height: 54,
+    },
+    {
+      class: "obstacle4",
+      width: 102,
+      height: 54,
+    },
+    {
+      class: "obstacle5",
+      width: 36,
+      height: 75,
+    },
+    {
+      class: "obstacle6",
+      width: 74,
+      height: 75,
+    },
+    {
+      class: "obstacle7",
+      width: 112,
+      height: 75,
+    },
+    {
+      class: "obstacle8",
+      width: 70,
+      height: 45,
+    },
+    {
+      class: "obstacle9",
+      width: 70,
+      height: 50,
+    }
+  ];
+
   function init() {
     gameLoop = setInterval(run, 1000 / FPS);
     generateCloudsLoop = setInterval(generateClouds, 1500);
-    generateObstaclesLoop = setInterval(generateObstacles, 4000);
+    generateObstaclesLoop = setInterval(generateObstacles, 2000);
     dayNightLoop = setInterval(dayNight, 5000);
     desert = new Desert();
     dino = new Dino();
@@ -245,21 +293,42 @@
 
   class Obstacle {
     constructor() {
+      let index = Math.floor(Math.random() * obstaclesTemplates.length);
+      this.template = obstaclesTemplates[index];
+
       this.minHeight = 2;
+      
+      if (this.template.class == "obstacle8" || this.template.class == "obstacle9") {
+        let additionalHeight = Math.floor(Math.random() * 3) * 60
+        this.minHeight = 2 + additionalHeight;
+      }
 
       this.element = document.createElement("div");
-
-      this.element.className =  /*"obstacle" + parseInt(Math.random() * 7);*/ "obstacle1";
-
-      this.element.style.right = "-70px";
+      this.element.className =  this.template.class;
+      this.element.style.right = `-${this.template.width}px`;
       this.element.style.bottom = `${this.minHeight}px`
-      this.element.style.width = "26px";
-      this.element.style.height = "54px";
+      this.element.style.width = this.template.width + "px";
+      this.element.style.height = this.template.height + "px";
 
       desert.element.appendChild(this.element);
     }
     move(obstacle) {
       if (parseInt(obstacle.element.style.right) < WIDTH) {
+
+        if (obstacle.template.class == "obstacle8" && frame % 60 === 0) {
+          obstacle.template = obstaclesTemplates[8];
+          obstacle.element.className =  obstacle.template.class;
+          obstacle.element.style.width = obstacle.template.width + "px";
+          obstacle.element.style.height = obstacle.template.height + "px";
+        }
+        else if(obstacle.template.class == "obstacle9" && frame % 60 === 0) {
+          obstacle.template = obstaclesTemplates[7];
+          obstacle.element.className =  obstacle.template.class;
+          obstacle.element.style.width = obstacle.template.width + "px";
+          obstacle.element.style.height = obstacle.template.height + "px";
+        }
+
+
         obstacle.element.style.right = `${parseInt(obstacle.element.style.right) + 1}px`;
 
         if (collided(
