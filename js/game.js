@@ -9,7 +9,6 @@
   const DINO_STATUS_RUNNING = 0;
   const DINO_STATUS_JUMPING = 1;
   const DINO_STATUS_SQUATTING = 2;
-  const DINO_STATUS_DIED = 3;
 
   const GAME_STATE_INITIALIZED = 0;
   const GAME_STATE_RUNNING = 1;
@@ -131,9 +130,7 @@
       dino.down = true;
 
       if (dino.status == DINO_STATUS_RUNNING) {
-        dino.status = DINO_STATUS_SQUATTING;
-        dino.element.style.backgroundPositionX = dino.backgroundPositionsX.squartting1
-        dino.element.className = "dino_squart";
+        dino.dinoOnSquat();
       }
     }
   })
@@ -147,9 +144,7 @@
       dino.down = false;
 
       if (dino.status == DINO_STATUS_SQUATTING) {
-        dino.status = DINO_STATUS_RUNNING;
-        dino.element.style.backgroundPositionX = dino.backgroundPositionsX.running1;
-        dino.element.className = "dino";
+        dino.dinoOnFeet();
       }
     }
   })
@@ -189,6 +184,7 @@
         jumping: "-1259px",
         died: "-1523px"
       }
+
       this.#status = DINO_STATUS_RUNNING;
       this.minHeight = 2;
       this.maxHeight = 150;
@@ -216,23 +212,6 @@
 
     run() {
       if (gameState == GAME_STATE_RUNNING) {
-        if (this.#status == DINO_STATUS_RUNNING || this.#status == DINO_STATUS_JUMPING) {
-          if (this.element.style.backgroundPositionX == this.backgroundPositionsX.squartting1
-            || this.element.style.backgroundPositionX == this.backgroundPositionsX.squartting2) {
-            this.element.style.backgroundPositionX = this.backgroundPositionsX.running1
-          }
-
-          this.element.className = "dino";
-        }
-        if (this.#status == DINO_STATUS_SQUATTING) {
-          if (this.element.style.backgroundPositionX == this.backgroundPositionsX.running1
-            || this.element.style.backgroundPositionX == this.backgroundPositionsX.running2) {
-            this.element.style.backgroundPositionX = this.backgroundPositionsX.squartting1
-          }
-
-          this.element.className = "dino_squart";
-        }
-
         if (this.#status == DINO_STATUS_RUNNING && frame % 20 === 0) {
           this.element.style.backgroundPositionX = this.element.style.backgroundPositionX === this.backgroundPositionsX.running1 ? this.backgroundPositionsX.running2 : this.backgroundPositionsX.running1;
         }
@@ -303,16 +282,32 @@
             this.element.style.bottom = "2px";
 
             if (this.down) {
-              this.status = DINO_STATUS_SQUATTING;
-              this.element.style.backgroundPositionX = this.backgroundPositionsX.squartting1
-              this.element.className = "dino_squart";
+              dino.dinoOnSquat();
             }
             else {
-              this.status = DINO_STATUS_RUNNING;
+              dino.dinoOnFeet();
             }
           }
         }
       }
+    }
+
+    dinoOnFeet() {
+      this.#status = DINO_STATUS_RUNNING; 
+      this.element.className = "dino";
+      this.element.style.width = `66px`
+      this.element.style.height = `70px`
+      this.element.style.backgroundPositionX = this.backgroundPositionsX.running1;
+      this.element.style.backgroundPositionY = "0px";
+    }
+
+    dinoOnSquat() {
+      this.#status = DINO_STATUS_SQUATTING;
+      this.element.className = "dino_squart";
+      this.element.style.width = `85px`
+      this.element.style.height = `45px`
+      this.element.style.backgroundPositionX = this.backgroundPositionsX.squartting1;
+      this.element.style.backgroundPositionY = "-25px";
     }
   }
 
@@ -412,7 +407,6 @@
   }
 
   function run() {
-    console.log("test");
     desert.counterElement.innerHTML = counter;
 
     if (gameState == GAME_STATE_RUNNING) {
