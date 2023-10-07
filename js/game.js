@@ -3,18 +3,21 @@
   const FPS = 300;
   const HEIGHT = 300;
   const WIDTH = 1024;
-  const PROB_CLOUD = 1;
+  const PROB_CLOUD = 100;
 
   let gameLoop;
+  let generateCloudsLoop;
   let desert;
   let dino;
   let clouds = [];
   let frame = 0;
 
   function init() {
-    gameLoop = setInterval(run, 1000 / FPS)
+    gameLoop = setInterval(run, 1000 / FPS);
+    generateCloudsLoop = setInterval(generateClouds, 1500);
     desert = new Desert();
     dino = new Dino();
+    utils = new Utils();
   }
 
   window.addEventListener("keydown", (e) => {
@@ -86,12 +89,26 @@
     constructor() {
       this.element = document.createElement("div");
       this.element.className = "cloud";
-      this.element.style.right = 0;
+      this.element.style.right = "-70px";
       this.element.style.top = `${parseInt(Math.random() * 200)}px`
       desert.element.appendChild(this.element);
     }
     move() {
-      this.element.style.right = `${parseInt(this.element.style.right) + 1}px`;
+      if (utils.pxToInt(this.element.style.right) < WIDTH) {
+        this.element.style.right = `${parseInt(this.element.style.right) + 1}px`;
+      }
+      else {
+        clouds.shift();
+        this.element.remove();
+      }
+    }
+  }
+
+  class Utils {
+    constructor() {}
+
+    pxToInt(px) {
+      return parseInt(px.substring(-2));
     }
   }
 
@@ -100,8 +117,13 @@
     if (frame === FPS) frame = 0;
     desert.move()
     dino.run()
-    if (Math.random() * 100 <= PROB_CLOUD) clouds.push(new Cloud());
     if (frame % 2 === 0) clouds.forEach(cloud => cloud.move());
+  }
+
+  function generateClouds() {
+    if (Math.random() * 100 <= PROB_CLOUD) {
+      clouds.push(new Cloud());
+    }
   }
 
   init()
