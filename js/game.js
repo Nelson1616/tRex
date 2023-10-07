@@ -20,6 +20,7 @@
   let desert;
   let dino;
   let frame = 0;
+  let counter = 0;
 
   function init() {
     gameLoop = setInterval(run, 1000 / FPS);
@@ -70,12 +71,18 @@
       this.element.className = "desert";
       this.element.style.width = `${WIDTH}px`;
       this.element.style.height = `${HEIGHT}px`;
-      document.getElementById("game").appendChild(this.element)
+      document.getElementById("game").appendChild(this.element);
 
-      this.ground = document.createElement("div")
-      this.ground.className = "ground"
+      this.ground = document.createElement("div");
+      this.ground.className = "ground";
       this.ground.style.backgroundPositionX = 0;
-      this.element.appendChild(this.ground)
+      this.element.appendChild(this.ground);
+
+      this.counterElement = document.createElement("div");
+      this.counterElement.className = "counter";
+      this.counterElement.style.right = "0px";
+      this.element.appendChild(this.counterElement);
+
     }
     move() {
       this.ground.style.backgroundPositionX = `${parseInt(this.ground.style.backgroundPositionX) - 1}px`
@@ -227,6 +234,7 @@
           cloud.element.style.right = `${parseInt(cloud.element.style.right) + 1}px`;
         }
         else {
+          clearInterval(cloud.id);
           cloud.element.remove();
           cloud = null;
           
@@ -277,6 +285,8 @@
 
   function run() {
     frame = frame + 1
+    counter++;
+    desert.counterElement.innerHTML = counter;
     if (frame === FPS) frame = 0;
     desert.move()
     dino.run();
@@ -285,7 +295,7 @@
   function generateClouds() {
     if (Math.random() * 100 <= PROB_CLOUD) {
       let newCloud = new Cloud();
-      setInterval(newCloud.move, 1000 / FPS, newCloud);
+      newCloud.id = setInterval(newCloud.move, 1000 / FPS, newCloud);
     }
   }
 
