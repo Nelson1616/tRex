@@ -9,7 +9,6 @@
   let generateCloudsLoop;
   let desert;
   let dino;
-  let clouds = [];
   let frame = 0;
 
   function init() {
@@ -93,13 +92,14 @@
       this.element.style.top = `${parseInt(Math.random() * 200)}px`
       desert.element.appendChild(this.element);
     }
-    move() {
-      if (utils.pxToInt(this.element.style.right) < WIDTH) {
-        this.element.style.right = `${parseInt(this.element.style.right) + 1}px`;
-      }
-      else {
-        clouds.shift();
-        this.element.remove();
+    move(cloud) {
+      if (frame % 2 === 0) {
+        if (utils.pxToInt(cloud.element.style.right) < WIDTH) {
+          cloud.element.style.right = `${parseInt(cloud.element.style.right) + 1}px`;
+        }
+        else {
+          cloud.element.remove();
+        }
       }
     }
   }
@@ -116,13 +116,13 @@
     frame = frame + 1
     if (frame === FPS) frame = 0;
     desert.move()
-    dino.run()
-    if (frame % 2 === 0) clouds.forEach(cloud => cloud.move());
+    dino.run();
   }
 
   function generateClouds() {
     if (Math.random() * 100 <= PROB_CLOUD) {
-      clouds.push(new Cloud());
+      newCloud = new Cloud();
+      setInterval(newCloud.move, 1000 / FPS, newCloud);
     }
   }
 
