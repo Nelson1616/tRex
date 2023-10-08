@@ -89,10 +89,10 @@
     generateCloudsLoop = setInterval(generateClouds, 1500);
     intervals.push(generateCloudsLoop);
 
-    generateObstaclesLoop = setInterval(generateObstacles, 2000);
+    generateObstaclesLoop = setInterval(generateObstacles, 2500);
     intervals.push(generateObstaclesLoop);
 
-    dayNightLoop = setInterval(dayNight, 5000);
+    dayNightLoop = setInterval(dayNight, 60000);
     intervals.push(dayNightLoop);
 
     desert = new Desert();
@@ -413,7 +413,11 @@
 
     if (gameState == GAME_STATE_RUNNING) {
       frame = frame + 1
-      counter++;
+
+      if (frame % 20 === 0) {
+        counter += speed;
+      }
+      
       if (frame === FPS) frame = 0;
       desert.move()
       dino.run();
