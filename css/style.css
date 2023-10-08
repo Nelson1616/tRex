@@ -128,3 +128,30 @@
   position: absolute;
   color: red;
 }
+
+.gameover{
+  background-image: url(../img/sprite.png);
+  background-position: -970px -20px;
+  position: absolute;
+  bottom: 120px;
+  left: 0; 
+  right: 0; 
+  margin-right: auto;
+  margin-left: auto;
+  width: 290px;
+  height: 20px;
+  z-index: 2;
+}
+
+.restart{
+  background-image: url(../img/sprite.png);
+  position: absolute;
+  bottom: 50px;
+  left: 0; 
+  right: 0; 
+  margin-right: auto;
+  margin-left: auto;
+  width: 60px;
+  height: 60px;
+  z-index: 2;
+}

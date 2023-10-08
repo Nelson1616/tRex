@@ -295,7 +295,7 @@
     }
 
     dinoOnFeet() {
-      this.#status = DINO_STATUS_RUNNING; 
+      this.#status = DINO_STATUS_RUNNING;
       this.element.className = "dino";
       this.element.style.width = `66px`
       this.element.style.height = `70px`
@@ -402,10 +402,22 @@
   }
 
   function colisionDetected() {
-    console.log("aaa");
     gameState = GAME_STATE_OVER;
     dino.element.style.backgroundPositionX = dino.backgroundPositionsX.died;
+    showGameOver();
     end();
+  }
+
+  function showGameOver() {
+      let gameover = document.createElement("div")
+      gameover.className = "gameover";
+
+      desert.element.appendChild(gameover);
+
+      let restart = document.createElement("div")
+      restart.className = "restart";
+
+      desert.element.appendChild(restart);
   }
 
   function run() {
@@ -417,7 +429,7 @@
       if (frame % 20 === 0) {
         counter += speed;
       }
-      
+
       if (frame === FPS) frame = 0;
       desert.move()
       dino.run();
